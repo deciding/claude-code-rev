@@ -177,6 +177,7 @@ import tag from './commands/tag/index.js'
 import outputStyle from './commands/output-style/index.js'
 import remoteEnv from './commands/remote-env/index.js'
 import upgrade from './commands/upgrade/index.js'
+import auth from './commands/providers/index.js'
 import {
   extraUsage,
   extraUsageNonInteractive,
@@ -259,6 +260,7 @@ const COMMANDS = memoize((): Command[] => [
   addDir,
   advisor,
   agents,
+  auth(),
   branch,
   btw,
   chrome,

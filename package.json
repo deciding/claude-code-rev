@@ -21,6 +21,10 @@
     "dev:restore-check": "bun run ./src/dev-entry.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.0",
+    "@ai-sdk/google": "^1.0.0",
+    "@ai-sdk/openai": "^1.0.0",
+    "@ai-sdk/provider": "^1.0.0",
     "@alcalzone/ansi-tokenize": "*",
     "@ant/claude-for-chrome-mcp": "file:./shims/ant-claude-for-chrome-mcp",
     "@ant/computer-use-input": "file:./shims/ant-computer-use-input",
