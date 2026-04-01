@@ -2,6 +2,20 @@ import { getSettings_DEPRECATED } from '../settings/settings.js'
 import { isModelAlias, isModelFamilyAlias } from './aliases.js'
 import { parseUserSpecifiedModel } from './model.js'
 import { resolveOverriddenModel } from './modelStrings.js'
+import { detectProviderFromModel } from './routing.js'
+
+/**
+ * Check if a model is an AI SDK model (non-Anthropic provider)
+ */
+function isAISDKModel(model: string): boolean {
+  // Explicit provider prefix (e.g., "openai/gpt-4")
+  if (model.includes('/')) {
+    return true
+  }
+  // Known AI SDK model patterns
+  const provider = detectProviderFromModel(model)
+  return provider !== null && provider !== 'anthropic'
+}
 
 /**
  * Check if a model belongs to a given family by checking if its name
@@ -98,6 +112,11 @@ function familyHasSpecificEntries(
  * 3. Full model IDs ("claude-opus-4-5-20251101") — exact match only
  */
 export function isModelAllowed(model: string): boolean {
+  // AI SDK models are always allowed (they use their own provider's validation)
+  if (isAISDKModel(model)) {
+    return true
+  }
+
   const settings = getSettings_DEPRECATED() || {}
   const { availableModels } = settings
   if (!availableModels) {

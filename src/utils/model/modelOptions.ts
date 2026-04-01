@@ -14,8 +14,10 @@ import {
 } from '../modelCost.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
 import { checkOpus1mAccess, checkSonnet1mAccess } from './check1mAccess.js'
-import { getAPIProvider } from './providers.js'
+import { getAPIProvider, shouldUseAISDK } from './providers.js'
 import { isModelAllowed } from './modelAllowlist.js'
+import { ProviderRegistry } from '../../providers/registry.js'
+import { Auth } from '../../providers/auth.js'
 import {
   getCanonicalName,
   getClaudeAiUserDefaultModelDescription,
@@ -458,6 +460,54 @@ function getKnownModelOption(model: string): ModelOption | null {
   }
 }
 
+/**
+ * Check if an AI SDK provider is available (has API key)
+ */
+function isProviderAvailable(providerId: string): boolean {
+  const provider = ProviderRegistry.get(providerId)
+  if (!provider) return false
+  return !!(provider.env.some(envVar => !!process.env[envVar]))
+}
+
+/**
+ * Get AI SDK model options for the picker
+ */
+function getAISDKModelOptions(): ModelOption[] {
+  if (!shouldUseAISDK()) return []
+
+  const options: ModelOption[] = []
+
+  // OpenAI models
+  if (isProviderAvailable('openai')) {
+    const openaiProvider = ProviderRegistry.get('openai')
+    if (openaiProvider) {
+      for (const [modelId, modelInfo] of Object.entries(openaiProvider.models)) {
+        options.push({
+          value: `openai/${modelId}`,
+          label: modelInfo.name,
+          description: `OpenAI · ${modelInfo.name}`,
+        })
+      }
+    }
+  }
+
+  // Google models
+  if (isProviderAvailable('google')) {
+    const googleProvider = ProviderRegistry.get('google')
+    if (googleProvider) {
+      for (const [modelId, modelInfo] of Object.entries(googleProvider.models)) {
+        options.push({
+          value: `google/${modelId}`,
+          label: modelInfo.name,
+          description: `Google · ${modelInfo.name}`,
+        })
+      }
+    }
+  }
+
+  return options
+}
+
 export function getModelOptions(fastMode = false): ModelOption[] {
   const options = getModelOptionsBase(fastMode)
 
@@ -480,6 +530,16 @@ export function getModelOptions(fastMode = false): ModelOption[] {
   for (const opt of getGlobalConfig().additionalModelOptionsCache ?? []) {
     if (!options.some(existing => existing.value === opt.value)) {
       options.push(opt)
+    }
+  }
+
+  // Add AI SDK provider models when AI SDK is enabled
+  if (shouldUseAISDK()) {
+    const aiSDKOptions = getAISDKModelOptions()
+    for (const opt of aiSDKOptions) {
+      if (!options.some(existing => existing.value === opt.value)) {
+        options.push(opt)
+      }
     }
   }
 

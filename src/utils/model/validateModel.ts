@@ -10,9 +10,64 @@ import {
   AuthenticationError,
 } from '@anthropic-ai/sdk'
 import { getModelStrings } from './modelStrings.js'
+import { parseModelString, detectProviderFromModel } from './routing.js'
+import { ProviderRegistry } from '../../providers/registry.js'
+import { Auth } from '../../providers/auth.js'
 
 // Cache valid models to avoid repeated API calls
 const validModelCache = new Map<string, boolean>()
+
+/**
+ * Check if a model string is an AI SDK model (e.g., "openai/gpt-4")
+ */
+function isAISDKModel(model: string): boolean {
+  // Check for explicit provider prefix
+  if (model.includes('/')) {
+    const [provider] = model.split('/')
+    return ProviderRegistry.get(provider) !== undefined
+  }
+  // Check for known AI SDK model patterns
+  const provider = detectProviderFromModel(model)
+  return provider !== null && provider !== 'anthropic'
+}
+
+/**
+ * Validate an AI SDK model by checking if provider is available
+ */
+async function validateAISDKModel(
+  model: string,
+): Promise<{ valid: boolean; error?: string }> {
+  const [providerId, modelId] = parseModelString(model)
+  const provider = ProviderRegistry.get(providerId)
+
+  if (!provider) {
+    return { valid: false, error: `Unknown provider: ${providerId}` }
+  }
+
+  // Check if we have an API key for this provider
+  const credential = await Auth.get(providerId)
+  const hasKey =
+    credential?.key || provider.env.some(envVar => !!process.env[envVar])
+
+  if (!hasKey) {
+    return {
+      valid: false,
+      error: `No API key for ${provider.name}. Set ${provider.env[0]} or run /connect ${providerId}`,
+    }
+  }
+
+  // Check if model exists in provider's model list
+  if (provider.models[modelId]) {
+    return { valid: true }
+  }
+
+  // For OpenAI/Google, allow any model ID (API will validate)
+  if (providerId === 'openai' || providerId === 'google') {
+    return { valid: true }
+  }
+
+  return { valid: false, error: `Model '${modelId}' not found in ${provider.name}` }
+}
 
 /**
  * Validates a model by attempting an actual API call.
@@ -51,6 +106,10 @@ export async function validateModel(
     return { valid: true }
   }
 
+  // Check if this is an AI SDK model
+  if (isAISDKModel(normalizedModel)) {
+    return validateAISDKModel(normalizedModel)
+  }
 
   // Try to make an actual API call with minimal parameters
   try {

@@ -201,6 +201,11 @@ import { validateBoundedIntEnvVar } from '../../utils/envValidation.js'
 import { safeParseJSON } from '../../utils/json.js'
 import { getInferenceProfileBackingModel } from '../../utils/model/bedrock.js'
 import {
+  shouldUseAISDKForModel,
+  parseModelString,
+} from '../../utils/model/routing.js'
+import { aiSDKProvider } from '../../providers/ai-sdk/index.js'
+import {
   normalizeModelStringForAPI,
   parseUserSpecifiedModel,
 } from '../../utils/model/model.js'
@@ -1014,6 +1019,24 @@ export function stripExcessMediaItems(
   }) as (UserMessage | AssistantMessage)[]
 }
 
+/**
+ * Extract text content from a message for AI SDK routing
+ */
+function extractTextContent(
+  content: string | Array<{ type: string; text?: string; [key: string]: unknown }>,
+): string {
+  if (typeof content === 'string') {
+    return content
+  }
+  if (Array.isArray(content)) {
+    return content
+      .filter(block => block.type === 'text' && block.text)
+      .map(block => block.text!)
+      .join('\n')
+  }
+  return String(content || '')
+}
+
 async function* queryModel(
   messages: Message[],
   systemPrompt: SystemPrompt,
@@ -1046,6 +1069,71 @@ async function* queryModel(
       options.model,
     )
     return
+  }
+
+  // Multi-provider routing: Check if model should use AI SDK instead of Anthropic
+  if (await shouldUseAISDKForModel(options.model)) {
+    try {
+      const [providerId, modelId] = parseModelString(options.model)
+      logForDebugging(
+        `[Multi-Provider] Routing to ${providerId} with model ${modelId}`,
+      )
+
+      // Convert messages to AI SDK format
+      const sdkMessages = messages
+        .filter(
+          (msg): msg is UserMessage | AssistantMessage =>
+            msg.type === 'user' || msg.type === 'assistant',
+        )
+        .map(msg => ({
+          role: msg.type === 'user' ? 'user' : 'assistant',
+          content: extractTextContent(msg.message?.content || []),
+        }))
+
+      // Add system prompt as first message if present
+      if (systemPrompt && systemPrompt.length > 0) {
+        sdkMessages.unshift({
+          role: 'system',
+          content: systemPrompt.join('\n\n'),
+        })
+      }
+
+      // Accumulate full response, then yield as AssistantMessage
+      let fullText = ''
+      for await (const textChunk of aiSDKProvider.streamChat(
+        providerId,
+        modelId,
+        sdkMessages,
+        {
+          maxTokens: options.maxOutputTokensOverride,
+          temperature: options.temperatureOverride,
+        },
+      )) {
+        fullText += textChunk
+      }
+
+      logForDebugging(
+        `[Multi-Provider] Stream completed for ${providerId}/${modelId}`,
+      )
+
+      // Yield as a proper AssistantMessage
+      yield {
+        type: 'assistant',
+        message: {
+          content: [{ type: 'text', text: fullText }],
+        },
+      } as AssistantMessage
+      return
+    } catch (error) {
+      logForDebugging(
+        `[Multi-Provider] Error: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      yield getAssistantMessageFromError(
+        error instanceof Error ? error : new Error(String(error)),
+        options.model,
+      )
+      return
+    }
   }
 
   // Derive previous request ID from the last assistant message in this query chain.

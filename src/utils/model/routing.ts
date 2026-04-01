@@ -8,6 +8,14 @@
 import { shouldUseAISDK } from './providers.js'
 import { ProviderRegistry } from '../../providers/registry.js'
 import { Auth } from '../../providers/auth.js'
+import { OPENAI_PROVIDER } from '../../providers/ai-sdk/openai.js'
+import { GOOGLE_PROVIDER } from '../../providers/ai-sdk/google.js'
+import { ANTHROPIC_PROVIDER } from '../../providers/ai-sdk/anthropic.js'
+
+// Register bundled providers at module load so they're available everywhere
+ProviderRegistry.register(OPENAI_PROVIDER as any)
+ProviderRegistry.register(GOOGLE_PROVIDER as any)
+ProviderRegistry.register(ANTHROPIC_PROVIDER as any)
 
 /**
  * Check if a model should use the AI SDK provider system
