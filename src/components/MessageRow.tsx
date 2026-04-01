@@ -110,6 +110,8 @@ function MessageRowImpl(t0) {
     isLoading,
     lookups
   } = t0;
+  // Defensive guard: skip rendering if message is undefined/null
+  if (!msg) return null;
   const isTranscriptMode = screen === "transcript";
   const isGrouped = msg.type === "grouped_tool_use";
   const isCollapsed = msg.type === "collapsed_read_search";

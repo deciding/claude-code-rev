@@ -539,7 +539,9 @@ const MessagesImpl = ({
     // post-grouping array so each chunk gets correct tool-call grouping.
     const capApplies = !virtualScrollRuntimeGate && !disableRenderCap;
     const sliceStart = capApplies ? computeSliceStart(collapsed_0, sliceAnchorRef) : 0;
-    return renderRange ? collapsed_0.slice(renderRange[0], renderRange[1]) : sliceStart > 0 ? collapsed_0.slice(sliceStart) : collapsed_0;
+    const sliced = renderRange ? collapsed_0.slice(renderRange[0], renderRange[1]) : sliceStart > 0 ? collapsed_0.slice(sliceStart) : collapsed_0;
+    // Filter out undefined/null entries that can appear during degraded startup
+    return sliced.filter((m): m is RenderableMessage => m != null);
   }, [collapsed_0, renderRange, virtualScrollRuntimeGate, disableRenderCap]);
   const streamingToolUseIDs = useMemo(() => new Set(streamingToolUses.map(__0 => __0.contentBlock.id)), [streamingToolUses]);
 
