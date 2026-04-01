@@ -6,8 +6,8 @@
  */
 
 import { shouldUseAISDK } from './providers.js'
-import { ProviderRegistry } from '../providers/registry.js'
-import { Auth } from '../providers/auth.js'
+import { ProviderRegistry } from '../../providers/registry.js'
+import { Auth } from '../../providers/auth.js'
 
 /**
  * Check if a model should use the AI SDK provider system
