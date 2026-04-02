@@ -39,7 +39,8 @@ class AISDKProviderManager {
     const credential = await Auth.get(providerId)
     const apiKey = credential?.key || this.getEnvApiKey(provider)
     
-    if (!apiKey && provider.env.length > 0) {
+    // For subscription providers (opencode, opencode-go), allow without key
+    if (!apiKey && provider.env.length > 0 && provider.id !== 'opencode' && provider.id !== 'opencode-go') {
       throw new Error(
         `No API key found for ${provider.name}. ` +
         `Set ${provider.env[0]} environment variable or run /connect ${providerId}`
@@ -47,10 +48,19 @@ class AISDKProviderManager {
     }
 
     const providerModule = await this.loadProviderModule(provider)
-    const client = providerModule({
-      apiKey,
+    
+    // Build options - include baseURL for openai-compatible providers
+    const options: any = {
+      apiKey: apiKey || 'dummy', // Allow dummy key for subscription auth
       ...(provider.options || {})
-    })
+    }
+    
+    // Add baseURL if provider has API endpoint
+    if (provider.api) {
+      options.baseURL = provider.api
+    }
+    
+    const client = providerModule(options)
 
     const model = client.languageModel(modelId)
     
@@ -83,19 +93,20 @@ class AISDKProviderManager {
       // Find the correct create function for each provider
       let createFn = module.default
       
-      // If default is not a function, look for provider-specific create functions
-      if (typeof createFn !== 'function') {
-        // Try common create function names
-        const possibleFns = [
-          'createAnthropic',
-          'createOpenAI', 
-          'createGoogleGenerativeAI',
-          'createMistral',
-          'createGroq',
-          'createDeepSeek',
-          'createXai',
-          'createGoogleVertex'
-        ]
+    // If default is not a function, look for provider-specific create functions
+    if (typeof createFn !== 'function') {
+      // Try common create function names
+      const possibleFns = [
+        'createOpenAICompatible',
+        'createAnthropic',
+        'createOpenAI', 
+        'createGoogleGenerativeAI',
+        'createMistral',
+        'createGroq',
+        'createDeepSeek',
+        'createXai',
+        'createGoogleVertex'
+      ]
         
         for (const fnName of possibleFns) {
           if (module[fnName]) {
