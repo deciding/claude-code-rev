@@ -15,6 +15,7 @@ import { MISTRAL_PROVIDER } from '../../providers/ai-sdk/mistral.js'
 import { GROQ_PROVIDER } from '../../providers/ai-sdk/groq.js'
 import { DEEPSEEK_PROVIDER } from '../../providers/ai-sdk/deepseek.js'
 import { XAI_PROVIDER } from '../../providers/ai-sdk/xai.js'
+import { OPENROUTER_PROVIDER } from '../../providers/ai-sdk/openrouter.js'
 
 // Register bundled providers at module load so they're available everywhere
 ProviderRegistry.register(OPENAI_PROVIDER as any)
@@ -24,6 +25,7 @@ ProviderRegistry.register(MISTRAL_PROVIDER as any)
 ProviderRegistry.register(GROQ_PROVIDER as any)
 ProviderRegistry.register(DEEPSEEK_PROVIDER as any)
 ProviderRegistry.register(XAI_PROVIDER as any)
+ProviderRegistry.register(OPENROUTER_PROVIDER as any)
 
 /**
  * Check if a model should use the AI SDK provider system
@@ -68,6 +70,15 @@ export async function shouldUseAISDKForModel(model: string | null): Promise<bool
  * @returns Provider ID or null if unknown
  */
 export function detectProviderFromModel(model: string): string | null {
+  // Check for OpenRouter format (provider/model)
+  if (model.includes('/')) {
+    const provider = model.split('/')[0]
+    // Check if it's a known OpenRouter model prefix
+    if (['anthropic', 'meta-llama', 'deepseek', 'qwen', 'google', 'openai', 'xai', 'cohere', 'mistralai'].includes(provider)) {
+      return 'openrouter'
+    }
+  }
+
   // OpenAI models
   if (model.startsWith('gpt-') || model.startsWith('o1-') || model.startsWith('o3') || model.startsWith('o4')) {
     return 'openai'
