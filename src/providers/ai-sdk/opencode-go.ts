@@ -8,7 +8,7 @@
 import type { ProviderInfo, ModelInfo } from '../types.js'
 import { createModelInfo } from '../registry.js'
 
-export const OPENCODIGO_PROVIDER: Partial<ProviderInfo> = {
+export const OPENCODE_GO_PROVIDER: Partial<ProviderInfo> = {
   id: 'opencode-go',
   name: 'OpenCode Go',
   npm: '@ai-sdk/openai-compatible',
