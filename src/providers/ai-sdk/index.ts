@@ -79,7 +79,36 @@ class AISDKProviderManager {
 
     try {
       const module = await import(npm)
-      const createFn = module.default || module.createAnthropic || module.createOpenAI || module.createGoogleGenerativeAI
+      
+      // Find the correct create function for each provider
+      let createFn = module.default
+      
+      // If default is not a function, look for provider-specific create functions
+      if (typeof createFn !== 'function') {
+        // Try common create function names
+        const possibleFns = [
+          'createAnthropic',
+          'createOpenAI', 
+          'createGoogleGenerativeAI',
+          'createMistral',
+          'createGroq',
+          'createDeepSeek',
+          'createXai',
+          'createGoogleVertex'
+        ]
+        
+        for (const fnName of possibleFns) {
+          if (module[fnName]) {
+            createFn = module[fnName]
+            break
+          }
+        }
+      }
+      
+      // For some providers, the default export might be the function directly
+      if (!createFn && typeof module === 'function') {
+        createFn = module
+      }
       
       if (typeof createFn !== 'function') {
         throw new Error(`Provider module ${npm} does not export a valid create function`)

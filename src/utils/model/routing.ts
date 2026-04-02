@@ -11,11 +11,19 @@ import { Auth } from '../../providers/auth.js'
 import { OPENAI_PROVIDER } from '../../providers/ai-sdk/openai.js'
 import { GOOGLE_PROVIDER } from '../../providers/ai-sdk/google.js'
 import { ANTHROPIC_PROVIDER } from '../../providers/ai-sdk/anthropic.js'
+import { MISTRAL_PROVIDER } from '../../providers/ai-sdk/mistral.js'
+import { GROQ_PROVIDER } from '../../providers/ai-sdk/groq.js'
+import { DEEPSEEK_PROVIDER } from '../../providers/ai-sdk/deepseek.js'
+import { XAI_PROVIDER } from '../../providers/ai-sdk/xai.js'
 
 // Register bundled providers at module load so they're available everywhere
 ProviderRegistry.register(OPENAI_PROVIDER as any)
 ProviderRegistry.register(GOOGLE_PROVIDER as any)
 ProviderRegistry.register(ANTHROPIC_PROVIDER as any)
+ProviderRegistry.register(MISTRAL_PROVIDER as any)
+ProviderRegistry.register(GROQ_PROVIDER as any)
+ProviderRegistry.register(DEEPSEEK_PROVIDER as any)
+ProviderRegistry.register(XAI_PROVIDER as any)
 
 /**
  * Check if a model should use the AI SDK provider system
@@ -61,11 +69,11 @@ export async function shouldUseAISDKForModel(model: string | null): Promise<bool
  */
 export function detectProviderFromModel(model: string): string | null {
   // OpenAI models
-  if (model.startsWith('gpt-') || model.startsWith('o1-') || model.startsWith('o3-')) {
+  if (model.startsWith('gpt-') || model.startsWith('o1-') || model.startsWith('o3') || model.startsWith('o4')) {
     return 'openai'
   }
 
-  // Google models
+  // Google/Gemini models
   if (model.startsWith('gemini-')) {
     return 'google'
   }
@@ -73,6 +81,26 @@ export function detectProviderFromModel(model: string): string | null {
   // Anthropic models (Claude)
   if (model.startsWith('claude-')) {
     return 'anthropic'
+  }
+
+  // Mistral models
+  if (model.startsWith('mistral-') || model.startsWith('pixtral-')) {
+    return 'mistral'
+  }
+
+  // Groq models (Llama, Mixtral)
+  if (model.startsWith('llama') || model.startsWith('mixtral-')) {
+    return 'groq'
+  }
+
+  // DeepSeek models
+  if (model.startsWith('deepseek-')) {
+    return 'deepseek'
+  }
+
+  // xAI Grok models
+  if (model.startsWith('grok-')) {
+    return 'xai'
   }
 
   // Unknown - will use legacy system

@@ -8,6 +8,10 @@ import { ProviderRegistry } from '../../providers/registry.js'
 import { OPENAI_PROVIDER } from '../../providers/ai-sdk/openai.js'
 import { GOOGLE_PROVIDER } from '../../providers/ai-sdk/google.js'
 import { ANTHROPIC_PROVIDER } from '../../providers/ai-sdk/anthropic.js'
+import { MISTRAL_PROVIDER } from '../../providers/ai-sdk/mistral.js'
+import { GROQ_PROVIDER } from '../../providers/ai-sdk/groq.js'
+import { DEEPSEEK_PROVIDER } from '../../providers/ai-sdk/deepseek.js'
+import { XAI_PROVIDER } from '../../providers/ai-sdk/xai.js'
 import os from 'os'
 import path from 'path'
 
@@ -16,6 +20,10 @@ try {
   ProviderRegistry.register(OPENAI_PROVIDER as any)
   ProviderRegistry.register(GOOGLE_PROVIDER as any)
   ProviderRegistry.register(ANTHROPIC_PROVIDER as any)
+  ProviderRegistry.register(MISTRAL_PROVIDER as any)
+  ProviderRegistry.register(GROQ_PROVIDER as any)
+  ProviderRegistry.register(DEEPSEEK_PROVIDER as any)
+  ProviderRegistry.register(XAI_PROVIDER as any)
 } catch (error) {
   console.error('Failed to register providers:', error)
 }
