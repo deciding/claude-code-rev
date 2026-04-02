@@ -16,6 +16,7 @@ import { GROQ_PROVIDER } from '../../providers/ai-sdk/groq.js'
 import { DEEPSEEK_PROVIDER } from '../../providers/ai-sdk/deepseek.js'
 import { XAI_PROVIDER } from '../../providers/ai-sdk/xai.js'
 import { OPENROUTER_PROVIDER } from '../../providers/ai-sdk/openrouter.js'
+import { OPENCODE_ZEN_PROVIDER } from '../../providers/ai-sdk/opencode-zen.js'
 
 // Register bundled providers at module load so they're available everywhere
 ProviderRegistry.register(OPENAI_PROVIDER as any)
@@ -26,6 +27,7 @@ ProviderRegistry.register(GROQ_PROVIDER as any)
 ProviderRegistry.register(DEEPSEEK_PROVIDER as any)
 ProviderRegistry.register(XAI_PROVIDER as any)
 ProviderRegistry.register(OPENROUTER_PROVIDER as any)
+ProviderRegistry.register(OPENCODE_ZEN_PROVIDER as any)
 
 /**
  * Check if a model should use the AI SDK provider system
