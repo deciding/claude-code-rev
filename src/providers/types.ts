@@ -7,7 +7,7 @@
 
 export type ProviderType = 'legacy' | 'ai-sdk'
 
-export type CredentialType = 'api' | 'oauth'
+export type CredentialType = 'api' | 'oauth' | 'subscription'
 
 export interface ProviderInfo {
   id: string
@@ -82,6 +82,12 @@ export interface Credential {
   access?: string
   refresh?: string
   expires?: number
+  subscriptionId?: string
+  plan?: 'free' | 'pro' | 'team' | 'enterprise'
+  credits?: number
+  usedCredits?: number
+  billingEmail?: string
+  extra?: Record<string, any>
   [key: string]: any
 }
 
@@ -118,4 +124,18 @@ export interface ChatDelta {
 
 export interface ProviderTransform {
   variants: (model: ModelInfo) => Record<string, any>
+}
+
+export interface ProviderAuthMethod {
+  type: 'api' | 'oauth' | 'subscription'
+  label: string
+  description?: string
+  prompts?: Array<{
+    type: 'text' | 'select'
+    key: string
+    message: string
+    placeholder?: string
+    options?: Array<{ label: string; value: string }>
+    when?: { key: string; op: 'eq' | 'neq'; value: string }
+  }>
 }
