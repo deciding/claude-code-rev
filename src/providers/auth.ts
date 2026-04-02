@@ -110,3 +110,36 @@ export function isOAuthCredential(credential: Credential): boolean {
   return credential.type === 'oauth' && 
          typeof credential.access === 'string'
 }
+
+export function isSubscriptionCredential(credential: Credential): boolean {
+  return credential.type === 'subscription'
+}
+
+export function getSubscriptionInfo(credential: Credential): {
+  plan: string
+  credits: number
+  usedCredits: number
+  remainingCredits: number
+} | null {
+  if (credential.type !== 'subscription') return null
+  return {
+    plan: credential.plan || 'free',
+    credits: credential.credits || 0,
+    usedCredits: credential.usedCredits || 0,
+    remainingCredits: (credential.credits || 0) - (credential.usedCredits || 0)
+  }
+}
+
+export async function updateSubscriptionUsage(
+  provider: string, 
+  usedCredits: number
+): Promise<void> {
+  const credential = await Auth.get(provider)
+  if (!credential || credential.type !== 'subscription') return
+  
+  const updated: Credential = {
+    ...credential,
+    usedCredits: (credential.usedCredits || 0) + usedCredits
+  }
+  await Auth.set(provider, updated)
+}
