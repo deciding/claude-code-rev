@@ -13,6 +13,7 @@ import { join } from 'path'
 
 const CACHE_FILE_NAME = 'models-dev-cache.json'
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+const MODELS_DEV_URL = 'https://models.dev/api.json'
 
 // Bundled models from opencode reference (used as fallback)
 const BUNDLED_MODELS: ModelsDevResponse = {
