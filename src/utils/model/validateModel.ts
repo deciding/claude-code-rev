@@ -30,6 +30,7 @@ function isAISDKModel(model: string): boolean {
   }
   // Check for known AI SDK model patterns (but NOT anthropic - they use legacy)
   const provider = detectProviderFromModel(model)
+  // Return true only if provider exists AND is NOT anthropic
   return provider !== null && provider !== 'anthropic'
 }
 
