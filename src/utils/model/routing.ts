@@ -33,9 +33,18 @@ ProviderRegistry.register(OPENCODE_ZEN_PROVIDER as any)
 ProviderRegistry.register(OPENCODE_GO_PROVIDER as any)
 
 // Also register models from models.dev (async, best-effort)
+// Merge with existing providers to get all models
 ModelsDev.get().then(providers => {
   for (const [id, provider] of Object.entries(providers)) {
-    if (!ProviderRegistry.has(id)) {
+    const existing = ProviderRegistry.get(id)
+    if (existing) {
+      // Merge models from models.dev with existing provider
+      const mergedModels = { ...existing.models, ...provider.models }
+      ProviderRegistry.register({
+        ...existing,
+        models: mergedModels
+      } as any)
+    } else {
       ProviderRegistry.register(provider as any)
     }
   }
@@ -45,7 +54,14 @@ export async function loadModelsFromDev(): Promise<void> {
   try {
     const providers = await ModelsDev.get()
     for (const [id, provider] of Object.entries(providers)) {
-      if (!ProviderRegistry.has(id)) {
+      const existing = ProviderRegistry.get(id)
+      if (existing) {
+        const mergedModels = { ...existing.models, ...provider.models }
+        ProviderRegistry.register({
+          ...existing,
+          models: mergedModels
+        } as any)
+      } else {
         ProviderRegistry.register(provider as any)
       }
     }
