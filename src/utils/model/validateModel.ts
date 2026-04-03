@@ -39,25 +39,16 @@ async function validateAISDKModel(
 ): Promise<{ valid: boolean; error?: string }> {
   const [providerId, modelId] = parseModelString(model)
   const provider = ProviderRegistry.get(providerId)
+  console.log(`[Validate] Checking model '${model}', providerId: '${providerId}', provider found: ${!!provider}`)
 
   if (!provider) {
     return { valid: false, error: `Unknown provider: ${providerId}` }
   }
 
-  // Check if we have an API key for this provider
-  const credential = await Auth.get(providerId)
-  const hasKey =
-    credential?.key || provider.env.some(envVar => !!process.env[envVar])
-
-  if (!hasKey) {
-    return {
-      valid: false,
-      error: `No API key for ${provider.name}. Set ${provider.env[0]} or run /connect ${providerId}`,
-    }
-  }
-
   // Check if model exists in provider's model list
+  console.log(`[Validate] Checking if '${modelId}' exists in provider models: ${Object.keys(provider.models).join(', ')}`)
   if (provider.models[modelId]) {
+    console.log(`[Validate] Model found!`)
     return { valid: true }
   }
 
