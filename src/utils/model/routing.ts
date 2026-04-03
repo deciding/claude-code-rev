@@ -79,7 +79,6 @@ export async function loadModelsFromDev(): Promise<void> {
 export async function shouldUseAISDKForModel(model: string | null): Promise<boolean> {
   // If explicitly set to use AI SDK
   if (shouldUseAISDK()) {
-    console.error('[Routing] shouldUseAISDK() forced true')
     return true
   }
 
@@ -92,7 +91,6 @@ export async function shouldUseAISDKForModel(model: string | null): Promise<bool
   if (model.includes('/')) {
     const [provider] = model.split('/')
     const providerInfo = ProviderRegistry.get(provider)
-    console.error(`[Routing] Model '${model}' has prefix '${provider}', provider found: ${!!providerInfo}`)
     if (providerInfo) {
       return true
     }
@@ -100,7 +98,6 @@ export async function shouldUseAISDKForModel(model: string | null): Promise<bool
 
   // Check if model is from a known AI SDK provider
   const provider = detectProviderFromModel(model)
-  console.error(`[Routing] detectProviderFromModel('${model}') = '${provider}'`)
   if (provider && provider !== 'anthropic') {
     return true
   }

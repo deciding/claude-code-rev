@@ -32,18 +32,12 @@ class AISDKProviderManager {
     }
 
     const provider = ProviderRegistry.get(providerId)
-    console.error(`[AI SDK] ProviderRegistry.get('${providerId}') = ${provider ? 'found' : 'NOT FOUND'}`)
-    console.error(`[AI SDK] Available providers in registry: ${ProviderRegistry.getAllIds().join(', ')}`)
-    if (provider) {
-      console.error(`[AI SDK] Available models for ${providerId}: ${Object.keys(provider.models).join(', ')}`)
-    }
     if (!provider) {
       throw new Error(`Provider not found: ${providerId}`)
     }
 
     const credential = await Auth.get(providerId)
     const apiKey = credential?.key || this.getEnvApiKey(provider)
-    console.error(`[AI SDK] Provider: ${providerId}, Credential: ${!!credential}, API Key from env: ${!!this.getEnvApiKey(provider)}, Key value: ${apiKey ? 'set' : 'missing'}`)
     
     // For subscription providers (opencode, opencode-go), allow without key
     if (!apiKey && provider.env.length > 0 && provider.id !== 'opencode' && provider.id !== 'opencode-go') {
@@ -54,7 +48,6 @@ class AISDKProviderManager {
     }
 
     const providerModule = await this.loadProviderModule(provider)
-    console.error(`[AI SDK] Loaded module: ${provider.npm}, API: ${provider.api}`)
     
     // Build options - include baseURL for openai-compatible providers
     const options: any = {
@@ -66,8 +59,6 @@ class AISDKProviderManager {
     if (provider.api) {
       options.baseURL = provider.api
     }
-    
-    console.log(`[AI SDK] Creating client with baseURL: ${options.baseURL}, apiKey: ${options.apiKey ? 'set' : 'missing'}`)
     
     const client = providerModule(options)
 
@@ -99,23 +90,20 @@ class AISDKProviderManager {
     try {
       const module = await import(npm)
       
-      // Find the correct create function for each provider
       let createFn = module.default
       
-    // If default is not a function, look for provider-specific create functions
-    if (typeof createFn !== 'function') {
-      // Try common create function names
-      const possibleFns = [
-        'createOpenAICompatible',
-        'createAnthropic',
-        'createOpenAI', 
-        'createGoogleGenerativeAI',
-        'createMistral',
-        'createGroq',
-        'createDeepSeek',
-        'createXai',
-        'createGoogleVertex'
-      ]
+      if (typeof createFn !== 'function') {
+        const possibleFns = [
+          'createOpenAICompatible',
+          'createAnthropic',
+          'createOpenAI', 
+          'createGoogleGenerativeAI',
+          'createMistral',
+          'createGroq',
+          'createDeepSeek',
+          'createXai',
+          'createGoogleVertex'
+        ]
         
         for (const fnName of possibleFns) {
           if (module[fnName]) {
@@ -125,7 +113,6 @@ class AISDKProviderManager {
         }
       }
       
-      // For some providers, the default export might be the function directly
       if (!createFn && typeof module === 'function') {
         createFn = module
       }

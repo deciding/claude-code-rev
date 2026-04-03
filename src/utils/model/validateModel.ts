@@ -21,20 +21,14 @@ const validModelCache = new Map<string, boolean>()
  * Check if a model string is an AI SDK model (e.g., "openai/gpt-4")
  */
 function isAISDKModel(model: string): boolean {
-  console.error('[DEBUG isAISDKModel] START, model:', model)
   // Check for explicit provider prefix
   if (model.includes('/')) {
     const [provider] = model.split('/')
-    const found = ProviderRegistry.get(provider) !== undefined
-    console.error('[DEBUG isAISDKModel] has prefix, provider:', provider, 'found:', found)
-    return found
+    return ProviderRegistry.get(provider) !== undefined
   }
   // Check for known AI SDK model patterns
   const provider = detectProviderFromModel(model)
-  console.error('[DEBUG isAISDKModel] detectProviderFromModel result:', provider)
-  const result = provider !== null && provider !== 'anthropic'
-  console.error('[DEBUG isAISDKModel] returning:', result)
-  return result
+  return provider !== null && provider !== 'anthropic'
 }
 
 /**
@@ -45,16 +39,13 @@ async function validateAISDKModel(
 ): Promise<{ valid: boolean; error?: string }> {
   const [providerId, modelId] = parseModelString(model)
   const provider = ProviderRegistry.get(providerId)
-  console.error(`[Validate] Checking model '${model}', providerId: '${providerId}', provider found: ${!!provider}`)
 
   if (!provider) {
     return { valid: false, error: `Unknown provider: ${providerId}` }
   }
 
   // Check if model exists in provider's model list
-  console.error(`[Validate] Checking if '${modelId}' exists in provider models: ${Object.keys(provider.models).join(', ')}`)
   if (provider.models[modelId]) {
-    console.error(`[Validate] Model found!`)
     return { valid: true }
   }
 
@@ -73,7 +64,6 @@ export async function validateModel(
   model: string,
 ): Promise<{ valid: boolean; error?: string }> {
   const normalizedModel = model.trim()
-  console.error('[DEBUG validateModel] START, model:', normalizedModel)
 
   // Empty model is invalid
   if (!normalizedModel) {
