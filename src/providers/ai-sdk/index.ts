@@ -144,18 +144,30 @@ class AISDKProviderManager {
   ): Promise<string> {
     const model = await this.getProviderClient(providerId, modelId)
     
-    const result = await model.doStream({
+    // Separate system messages from regular messages
+    const systemMessages = messages.filter(m => m.role === 'system')
+    const nonSystemMessages = messages.filter(m => m.role !== 'system')
+    
+    const doStreamOptions: any = {
       inputFormat: 'messages',
       mode: { type: 'regular' },
-      prompt: messages.map(m => ({
-        role: m.role,
+      prompt: nonSystemMessages.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
         content: [{ type: 'text', text: m.content }]
       })),
       maxTokens: options?.maxTokens,
       temperature: options?.temperature,
       topP: options?.topP,
       stopSequences: options?.stopSequences
-    })
+    }
+    
+    // Add system prompt for Google and other providers that support it
+    if (systemMessages.length > 0) {
+      const systemContent = systemMessages.map(m => m.content).join('\n\n')
+      doStreamOptions.system = systemContent
+    }
+    
+    const result = await model.doStream(doStreamOptions)
 
     let fullText = ''
     for await (const chunk of result.stream) {
@@ -180,18 +192,30 @@ class AISDKProviderManager {
   ): AsyncGenerator<string> {
     const model = await this.getProviderClient(providerId, modelId)
     
-    const result = await model.doStream({
+    // Separate system messages from regular messages
+    const systemMessages = messages.filter(m => m.role === 'system')
+    const nonSystemMessages = messages.filter(m => m.role !== 'system')
+    
+    const doStreamOptions: any = {
       inputFormat: 'messages',
       mode: { type: 'regular' },
-      prompt: messages.map(m => ({
-        role: m.role,
+      prompt: nonSystemMessages.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
         content: [{ type: 'text', text: m.content }]
       })),
       maxTokens: options?.maxTokens,
       temperature: options?.temperature,
       topP: options?.topP,
       stopSequences: options?.stopSequences
-    })
+    }
+    
+    // Add system prompt for providers that support it
+    if (systemMessages.length > 0) {
+      const systemContent = systemMessages.map(m => m.content).join('\n\n')
+      doStreamOptions.system = systemContent
+    }
+    
+    const result = await model.doStream(doStreamOptions)
 
     for await (const chunk of result.stream) {
       if (chunk.type === 'text-delta') {

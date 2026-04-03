@@ -58,6 +58,51 @@ export const GOOGLE_PROVIDER: Partial<ProviderInfo> = {
       },
       cost: { input: 0.075, output: 0.3 },
       limit: { context: 1000000, output: 8192 }
+    }),
+    'gemini-2.0-flash': createModelInfo('gemini-2.0-flash', 'google', {
+      name: 'Gemini 2.0 Flash',
+      family: 'gemini-2.0',
+      capabilities: {
+        temperature: true,
+        reasoning: true,
+        attachment: true,
+        toolcall: true,
+        input: { text: true, audio: true, image: true, video: true, pdf: true },
+        output: { text: true, audio: true, image: false, video: false, pdf: false },
+        interleaved: true
+      },
+      cost: { input: 0.1, output: 0.4 },
+      limit: { context: 1000000, output: 8192 }
+    }),
+    'gemini-2.5-pro': createModelInfo('gemini-2.5-pro', 'google', {
+      name: 'Gemini 2.5 Pro',
+      family: 'gemini-2.5',
+      capabilities: {
+        temperature: true,
+        reasoning: true,
+        attachment: true,
+        toolcall: true,
+        input: { text: true, audio: true, image: true, video: true, pdf: true },
+        output: { text: true, audio: true, image: true, video: true, pdf: true },
+        interleaved: true
+      },
+      cost: { input: 1.25, output: 5 },
+      limit: { context: 2000000, output: 8192 }
+    }),
+    'gemini-2.5-flash': createModelInfo('gemini-2.5-flash', 'google', {
+      name: 'Gemini 2.5 Flash',
+      family: 'gemini-2.5',
+      capabilities: {
+        temperature: true,
+        reasoning: true,
+        attachment: true,
+        toolcall: true,
+        input: { text: true, audio: true, image: true, video: true, pdf: true },
+        output: { text: true, audio: true, image: false, video: false, pdf: false },
+        interleaved: true
+      },
+      cost: { input: 0.075, output: 0.3 },
+      limit: { context: 1000000, output: 8192 }
     })
   }
 }
