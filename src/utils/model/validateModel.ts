@@ -21,14 +21,20 @@ const validModelCache = new Map<string, boolean>()
  * Check if a model string is an AI SDK model (e.g., "openai/gpt-4")
  */
 function isAISDKModel(model: string): boolean {
+  console.log('[DEBUG isAISDKModel] START, model:', model)
   // Check for explicit provider prefix
   if (model.includes('/')) {
     const [provider] = model.split('/')
-    return ProviderRegistry.get(provider) !== undefined
+    const found = ProviderRegistry.get(provider) !== undefined
+    console.log('[DEBUG isAISDKModel] has prefix, provider:', provider, 'found:', found)
+    return found
   }
   // Check for known AI SDK model patterns
   const provider = detectProviderFromModel(model)
-  return provider !== null && provider !== 'anthropic'
+  console.log('[DEBUG isAISDKModel] detectProviderFromModel result:', provider)
+  const result = provider !== null && provider !== 'anthropic'
+  console.log('[DEBUG isAISDKModel] returning:', result)
+  return result
 }
 
 /**
@@ -67,6 +73,7 @@ export async function validateModel(
   model: string,
 ): Promise<{ valid: boolean; error?: string }> {
   const normalizedModel = model.trim()
+  console.log('[DEBUG validateModel] START, model:', normalizedModel)
 
   // Empty model is invalid
   if (!normalizedModel) {
