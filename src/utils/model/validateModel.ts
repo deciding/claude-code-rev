@@ -19,6 +19,8 @@ const validModelCache = new Map<string, boolean>()
 
 /**
  * Check if a model string is an AI SDK model (e.g., "openai/gpt-4")
+ * Note: Anthropic/Claude models should NOT be treated as AI SDK models here -
+ * they use the legacy Anthropic API validation
  */
 function isAISDKModel(model: string): boolean {
   // Check for explicit provider prefix
@@ -26,7 +28,7 @@ function isAISDKModel(model: string): boolean {
     const [provider] = model.split('/')
     return ProviderRegistry.get(provider) !== undefined
   }
-  // Check for known AI SDK model patterns
+  // Check for known AI SDK model patterns (but NOT anthropic - they use legacy)
   const provider = detectProviderFromModel(model)
   return provider !== null && provider !== 'anthropic'
 }
