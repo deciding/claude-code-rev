@@ -21,19 +21,19 @@ const validModelCache = new Map<string, boolean>()
  * Check if a model string is an AI SDK model (e.g., "openai/gpt-4")
  */
 function isAISDKModel(model: string): boolean {
-  console.log('[DEBUG isAISDKModel] START, model:', model)
+  console.error('[DEBUG isAISDKModel] START, model:', model)
   // Check for explicit provider prefix
   if (model.includes('/')) {
     const [provider] = model.split('/')
     const found = ProviderRegistry.get(provider) !== undefined
-    console.log('[DEBUG isAISDKModel] has prefix, provider:', provider, 'found:', found)
+    console.error('[DEBUG isAISDKModel] has prefix, provider:', provider, 'found:', found)
     return found
   }
   // Check for known AI SDK model patterns
   const provider = detectProviderFromModel(model)
-  console.log('[DEBUG isAISDKModel] detectProviderFromModel result:', provider)
+  console.error('[DEBUG isAISDKModel] detectProviderFromModel result:', provider)
   const result = provider !== null && provider !== 'anthropic'
-  console.log('[DEBUG isAISDKModel] returning:', result)
+  console.error('[DEBUG isAISDKModel] returning:', result)
   return result
 }
 
@@ -45,16 +45,16 @@ async function validateAISDKModel(
 ): Promise<{ valid: boolean; error?: string }> {
   const [providerId, modelId] = parseModelString(model)
   const provider = ProviderRegistry.get(providerId)
-  console.log(`[Validate] Checking model '${model}', providerId: '${providerId}', provider found: ${!!provider}`)
+  console.error(`[Validate] Checking model '${model}', providerId: '${providerId}', provider found: ${!!provider}`)
 
   if (!provider) {
     return { valid: false, error: `Unknown provider: ${providerId}` }
   }
 
   // Check if model exists in provider's model list
-  console.log(`[Validate] Checking if '${modelId}' exists in provider models: ${Object.keys(provider.models).join(', ')}`)
+  console.error(`[Validate] Checking if '${modelId}' exists in provider models: ${Object.keys(provider.models).join(', ')}`)
   if (provider.models[modelId]) {
-    console.log(`[Validate] Model found!`)
+    console.error(`[Validate] Model found!`)
     return { valid: true }
   }
 
@@ -73,7 +73,7 @@ export async function validateModel(
   model: string,
 ): Promise<{ valid: boolean; error?: string }> {
   const normalizedModel = model.trim()
-  console.log('[DEBUG validateModel] START, model:', normalizedModel)
+  console.error('[DEBUG validateModel] START, model:', normalizedModel)
 
   // Empty model is invalid
   if (!normalizedModel) {

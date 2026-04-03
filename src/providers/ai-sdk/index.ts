@@ -32,10 +32,10 @@ class AISDKProviderManager {
     }
 
     const provider = ProviderRegistry.get(providerId)
-    console.log(`[AI SDK] ProviderRegistry.get('${providerId}') = ${provider ? 'found' : 'NOT FOUND'}`)
-    console.log(`[AI SDK] Available providers in registry: ${ProviderRegistry.getAllIds().join(', ')}`)
+    console.error(`[AI SDK] ProviderRegistry.get('${providerId}') = ${provider ? 'found' : 'NOT FOUND'}`)
+    console.error(`[AI SDK] Available providers in registry: ${ProviderRegistry.getAllIds().join(', ')}`)
     if (provider) {
-      console.log(`[AI SDK] Available models for ${providerId}: ${Object.keys(provider.models).join(', ')}`)
+      console.error(`[AI SDK] Available models for ${providerId}: ${Object.keys(provider.models).join(', ')}`)
     }
     if (!provider) {
       throw new Error(`Provider not found: ${providerId}`)
@@ -43,7 +43,7 @@ class AISDKProviderManager {
 
     const credential = await Auth.get(providerId)
     const apiKey = credential?.key || this.getEnvApiKey(provider)
-    console.log(`[AI SDK] Provider: ${providerId}, Credential: ${!!credential}, API Key from env: ${!!this.getEnvApiKey(provider)}, Key value: ${apiKey ? 'set' : 'missing'}`)
+    console.error(`[AI SDK] Provider: ${providerId}, Credential: ${!!credential}, API Key from env: ${!!this.getEnvApiKey(provider)}, Key value: ${apiKey ? 'set' : 'missing'}`)
     
     // For subscription providers (opencode, opencode-go), allow without key
     if (!apiKey && provider.env.length > 0 && provider.id !== 'opencode' && provider.id !== 'opencode-go') {
@@ -54,7 +54,7 @@ class AISDKProviderManager {
     }
 
     const providerModule = await this.loadProviderModule(provider)
-    console.log(`[AI SDK] Loaded module: ${provider.npm}, API: ${provider.api}`)
+    console.error(`[AI SDK] Loaded module: ${provider.npm}, API: ${provider.api}`)
     
     // Build options - include baseURL for openai-compatible providers
     const options: any = {
