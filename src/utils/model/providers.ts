@@ -16,6 +16,10 @@ export function getAPIProvider(): APIProvider {
 }
 
 export function shouldUseAISDK(): boolean {
+  // Disable AI SDK entirely if this flag is set
+  if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_AI_SDK)) {
+    return false
+  }
   return getAPIProvider() === 'aiSDK'
 }
 
