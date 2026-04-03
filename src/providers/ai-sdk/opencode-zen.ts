@@ -149,6 +149,21 @@ export const OPENCODE_ZEN_PROVIDER: Partial<ProviderInfo> = {
       },
       cost: { input: 0.1, output: 0.1 },
       limit: { context: 128000, output: 8192 }
+    }),
+    'minimax-m2.5-free': createModelInfo('minimax-m2.5-free', 'opencode', {
+      name: 'MiniMax M2.5 Free',
+      family: 'minimax-free',
+      capabilities: {
+        temperature: true,
+        reasoning: true,
+        attachment: false,
+        toolcall: true,
+        input: { text: true, audio: false, image: false, video: false, pdf: false },
+        output: { text: true, audio: false, image: false, video: false, pdf: false },
+        interleaved: false
+      },
+      cost: { input: 0, output: 0 },
+      limit: { context: 204800, output: 131072 }
     })
   }
 }
@@ -163,6 +178,7 @@ export function isOpenCodeZenModel(modelId: string): boolean {
     'kimi-k2.5',
     'big-pickle',
     'minimax-m2.7',
-    'glm-5'
+    'glm-5',
+    'minimax-m2.5-free'
   ].includes(modelId)
 }
