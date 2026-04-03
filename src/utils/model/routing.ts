@@ -18,6 +18,7 @@ import { XAI_PROVIDER } from '../../providers/ai-sdk/xai.js'
 import { OPENROUTER_PROVIDER } from '../../providers/ai-sdk/openrouter.js'
 import { OPENCODE_ZEN_PROVIDER } from '../../providers/ai-sdk/opencode-zen.js'
 import { OPENCODE_GO_PROVIDER } from '../../providers/ai-sdk/opencode-go.js'
+import { ModelsDev } from '../../providers/models-dev.js'
 
 // Register bundled providers at module load so they're available everywhere
 ProviderRegistry.register(OPENAI_PROVIDER as any)
@@ -30,6 +31,28 @@ ProviderRegistry.register(XAI_PROVIDER as any)
 ProviderRegistry.register(OPENROUTER_PROVIDER as any)
 ProviderRegistry.register(OPENCODE_ZEN_PROVIDER as any)
 ProviderRegistry.register(OPENCODE_GO_PROVIDER as any)
+
+// Also register models from models.dev (async, best-effort)
+ModelsDev.get().then(providers => {
+  for (const [id, provider] of Object.entries(providers)) {
+    if (!ProviderRegistry.has(id)) {
+      ProviderRegistry.register(provider as any)
+    }
+  }
+}).catch(() => {})
+
+export async function loadModelsFromDev(): Promise<void> {
+  try {
+    const providers = await ModelsDev.get()
+    for (const [id, provider] of Object.entries(providers)) {
+      if (!ProviderRegistry.has(id)) {
+        ProviderRegistry.register(provider as any)
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load models from models.dev:', error)
+  }
+}
 
 /**
  * Check if a model should use the AI SDK provider system
